@@ -1,0 +1,31 @@
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { v4 } from "uuid";
+
+const REGION = "ap-south-1";
+
+const client = new DynamoDBClient({ region: REGION });
+const docClient = DynamoDBDocumentClient.from(client);
+
+export const handler: APIGatewayProxyHandler = async (event) => {
+	const { userId } = JSON.parse(event.body || "");
+
+	const Item = {
+		id: v4(),
+		userId,
+		uplodedDateTime: Date.now(),
+	};
+
+	const response = await docClient.send(
+		new PutCommand({
+			TableName: "vidshare-video",
+			Item,
+		})
+	);
+
+	console.log(response);
+	return {
+		statusCode: 200,
+		body: JSON.stringify(response),
+	};
+};
