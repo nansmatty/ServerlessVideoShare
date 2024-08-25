@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 
-export class DB {
+export class DB<T extends Record<string, any>> {
 	private client: DynamoDBClient;
 	private docClient: DynamoDBDocumentClient;
 
@@ -19,12 +19,16 @@ export class DB {
 		});
 	}
 
-	async save(doc: any) {
+	async save(doc: T) {
 		return this.docClient.send(
 			new PutCommand({
 				TableName: this.config.tableName,
 				Item: doc,
 			})
 		);
+	}
+
+	async update({ id, attrs }: { id: string; attrs: Partial<Omit<T, "id">> }) {
+		//
 	}
 }
