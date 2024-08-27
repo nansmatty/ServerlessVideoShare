@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 export class DB<T extends Record<string, any>> {
 	private client: DynamoDBClient;
@@ -29,6 +29,27 @@ export class DB<T extends Record<string, any>> {
 	}
 
 	async update({ id, attrs }: { id: string; attrs: Partial<Omit<T, "id">> }) {
-		//
+		const UpdateExpressionArr: string[] = [];
+		const ExpressionAttributeNames: Record<string, any> = {};
+		const ExpressionAttributeValues: Record<string, any> = {};
+
+		(Object.keys(attrs) as Array<keyof typeof attrs>).forEach((key) => {
+			ExpressionAttributeNames[`#${String(key)}`] = key;
+			ExpressionAttributeValues[`:${String(key)}`] = attrs[key];
+			UpdateExpressionArr.push(`#${String(key)} = :${String(key)}`);
+		});
+
+		return this.docClient.send(
+			new UpdateCommand({
+				TableName: this.config.tableName,
+				Key: {
+					id,
+				},
+				ExpressionAttributeNames,
+				ExpressionAttributeValues,
+				UpdateExpression: `set ${UpdateExpressionArr.join(", ")}`,
+				ReturnValues: "ALL_NEW",
+			})
+		);
 	}
 }
