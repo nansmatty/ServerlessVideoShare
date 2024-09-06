@@ -12,7 +12,7 @@ const video_db = new VideoDB({
 export const handler: S3Handler = async (event) => {
 	const id = event.Records[0].s3.object.key;
 
-	video_db.update({
+	await video_db.update({
 		id,
 		attrs: {
 			status: "UPLOADED",
