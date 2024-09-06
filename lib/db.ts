@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
-export class DB<T extends Record<string, any>> {
+export class DB<T extends { id: string }> {
 	private client: DynamoDBClient;
 	private docClient: DynamoDBDocumentClient;
 
